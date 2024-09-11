@@ -1,25 +1,25 @@
 name: bypassCF cron
 on:
   schedule:
-    # 每小时运行一次
-    - cron: "0 * * * *"
-  workflow_dispatch: # 允许手动触发
+    # Every day at 6 AM
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Allows manual trigger
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 设置作业超时时间为20分钟
+    timeout-minutes: 20 # Set job timeout to 20 minutes
     strategy:
       matrix:
         node-version: [20.x]
     env:
-      # 在作业级别设置环境变量
+      # Set environment variables at the job level
       USERNAMES: ${{ secrets.USERNAMES }}
       PASSWORDS: ${{ secrets.PASSWORDS }}
       RUN_TIME_LIMIT_MINUTES: ${{ secrets.RUN_TIME_LIMIT_MINUTES }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
-      - uses: actions/checkout@v3 # 检出仓库
+      - uses: actions/checkout@v3 # Checkout the repository
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -31,11 +31,11 @@ jobs:
       - name: Load environment variables
         run: |
           echo "Debug: Checking if .env file exists..."
-          # 检查 .env 文件是否存在
+          # Check if .env file exists
           if [ -f .env ]; then
             echo ".env file found. Loading environment variables from .env file"
             
-            # 加载 .env 文件中的默认值
+            # Load default values from .env file
             set -a
             source .env
             set +a
@@ -44,7 +44,7 @@ jobs:
           else
             echo ".env file not found. Skipping loading."
           fi
-          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
+          if [ -n "$WEBSITE" ]; then
             echo "Using GitHub Secret for WEBSITE"
             echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
           else
